@@ -1,0 +1,263 @@
+{
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "minimax": {
+        "baseUrl": "https://api.minimax.io/anthropic",
+        "apiKey": "${MINIMAX_API_KEY}",
+        "api": "anthropic-messages",
+        "models": [
+          {
+            "id": "MiniMax-M2.5-highspeed",
+            "name": "MiniMax M2.5 Highspeed",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0.3,
+              "output": 1.2,
+              "cacheRead": 0.03,
+              "cacheWrite": 0.12
+            },
+            "contextWindow": 200000,
+            "maxTokens": 32768
+          }
+        ]
+      },
+      "anthropic": {
+        "baseUrl": "https://api.anthropic.com",
+        "api": "anthropic-messages",
+        "models": [
+          {
+            "id": "claude-sonnet-4-6",
+            "name": "Claude Sonnet 4.6",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 200000,
+            "maxTokens": 16384
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "profiles": {
+      "minimax:default": {
+        "provider": "minimax",
+        "mode": "api_key"
+      },
+      "anthropic:default": {
+        "provider": "anthropic",
+        "mode": "api_key"
+      }
+    }
+  },
+  "skills": {
+    "load": {
+      "extraDirs": [
+        "/root/.openclaw/shared-skills",
+        "/root/.openclaw/workspace/skills"
+      ]
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "minimax/MiniMax-M2.5-highspeed"
+      },
+      "models": {
+        "minimax/MiniMax-M2.5-highspeed": {
+          "alias": "minimax"
+        }
+      },
+      "workspace": "/root/.openclaw/workspace",
+      "heartbeat": {
+        "every": "6h",
+        "target": "last",
+        "directPolicy": "allow"
+      },
+      "maxConcurrent": 2,
+      "timeoutSeconds": 300,
+      "subagents": {
+        "maxConcurrent": 4,
+        "maxSpawnDepth": 2,
+        "maxChildrenPerAgent": 3
+      }
+    },
+    "list": [
+      {
+        "id": "sumbawa",
+        "default": true,
+        "skills": [
+          "sumbawa-sales",
+          "lead-qualifier",
+          "follow-up",
+          "product-marketing-context",
+          "cold-email",
+          "marketing-psychology",
+          "pricing-strategy",
+          "launch-strategy",
+          "sales-enablement",
+          "skill-creator"
+        ]
+      },
+      {
+        "id": "content-writer",
+        "model": {
+          "primary": "minimax/MiniMax-M2.5-highspeed"
+        },
+        "workspace": "/root/.openclaw/workspace-content-writer",
+        "skills": [
+          "content-creator",
+          "seo-optimizer",
+          "copywriting",
+          "content-strategy",
+          "social-content",
+          "copy-editing",
+          "email-sequence",
+          "seo-audit",
+          "ai-seo",
+          "schema-markup"
+        ],
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "web_search",
+            "web_fetch",
+            "exec"
+          ]
+        }
+      },
+      {
+        "id": "competitor-spy",
+        "model": {
+          "primary": "minimax/MiniMax-M2.5-highspeed"
+        },
+        "workspace": "/root/.openclaw/workspace-competitor-spy",
+        "skills": [
+          "ad-spy",
+          "competitor-alternatives"
+        ]
+      },
+      {
+        "id": "ad-manager",
+        "model": {
+          "primary": "minimax/MiniMax-M2.5-highspeed"
+        },
+        "workspace": "/root/.openclaw/workspace-ad-manager",
+        "skills": [
+          "ad-cabinet",
+          "creative-generator",
+          "retargeting-funnel",
+          "ad-creative",
+          "paid-ads",
+          "marketing-ideas"
+        ],
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "exec"
+          ],
+          "deny": [
+            "web_search"
+          ]
+        }
+      },
+      {
+        "id": "analytics-brain",
+        "model": {
+          "primary": "minimax/MiniMax-M2.5-highspeed"
+        },
+        "workspace": "/root/.openclaw/workspace-analytics-brain",
+        "skills": [
+          "ad-analytics",
+          "analytics-tracking",
+          "ab-test-setup",
+          "page-cro"
+        ],
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "exec"
+          ],
+          "deny": [
+            "web_search"
+          ]
+        }
+      }
+    ]
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "channelHealthCheckMinutes": 0,
+    "auth": {
+      "mode": "token",
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    },
+    "bind": "lan"
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": false,
+      "dmPolicy": "open",
+      "allowFrom": [
+        "*"
+      ]
+    },
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing"
+    }
+  },
+  "session": {
+    "dmScope": "per-channel-peer",
+    "reset": {
+      "mode": "idle",
+      "idleMinutes": 1440
+    }
+  },
+  "tools": {
+    "profile": "full",
+    "web": {
+      "search": {
+        "enabled": true,
+        "provider": "brave"
+      },
+      "fetch": {
+        "enabled": true
+      }
+    }
+  },
+  "messages": {
+    "ackReactionScope": "all"
+  },
+  "env": {
+    "vars": {
+      "MINIMAX_API_KEY": "${MINIMAX_API_KEY}",
+      "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+      "META_ADS_ACCESS_TOKEN": "${META_ADS_ACCESS_TOKEN}",
+      "META_AD_ACCOUNT_ID": "${META_AD_ACCOUNT_ID}",
+      "META_PAGE_ID": "${META_PAGE_ID}",
+      "META_PIXEL_ID": "${META_PIXEL_ID}",
+      "META_APP_ID": "${META_APP_ID}",
+      "META_APP_SECRET": "${META_APP_SECRET}",
+      "GOOGLE_ADS_CLIENT_ID": "${GOOGLE_ADS_CLIENT_ID}",
+      "GOOGLE_ADS_CLIENT_SECRET": "${GOOGLE_ADS_CLIENT_SECRET}",
+      "GOOGLE_ADS_REFRESH_TOKEN": "${GOOGLE_ADS_REFRESH_TOKEN}",
+      "GOOGLE_ADS_DEVELOPER_TOKEN": "${GOOGLE_ADS_DEVELOPER_TOKEN}",
+      "GOOGLE_ADS_CUSTOMER_ID": "${GOOGLE_ADS_CUSTOMER_ID}",
+      "GOOGLE_ADS_LOGIN_CUSTOMER_ID": "${GOOGLE_ADS_LOGIN_CUSTOMER_ID}",
+      "REPLICATE_API_TOKEN": "${REPLICATE_API_TOKEN}"
+    }
+  }
+}

@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+  sumbawa-agent:
+    image: node:22-bookworm
+    container_name: sumbawa-agent
+    restart: unless-stopped
+    ports:
+      - "19000:18789"
+    volumes:
+      - ./config/openclaw.json:/root/.openclaw/openclaw.json
+      - ./workspace:/root/.openclaw/workspace
+      - ./workspace-ad-manager:/root/.openclaw/workspace-ad-manager
+      - ./workspace-content-writer:/root/.openclaw/workspace-content-writer
+      - ./workspace-competitor-spy:/root/.openclaw/workspace-competitor-spy
+      - ./workspace-analytics-brain:/root/.openclaw/workspace-analytics-brain
+      - ./shared-skills:/root/.openclaw/shared-skills
+      - ./data:/root/.openclaw/data
+      - ./scripts:/root/.openclaw/scripts
+      - agent-home:/root
+      - npm-global:/usr/local/lib/node_modules
+      - npm-bin:/usr/local/bin
+    environment:
+      - NODE_ENV=production
+      - HOME=/root
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - BRAVE_SEARCH_API_KEY=${BRAVE_SEARCH_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # Ad platforms
+      - META_ADS_ACCESS_TOKEN=${META_ADS_ACCESS_TOKEN:-}
+      - META_AD_ACCOUNT_ID=${META_AD_ACCOUNT_ID:-}
+      - META_PAGE_ID=${META_PAGE_ID:-}
+      - META_PIXEL_ID=${META_PIXEL_ID:-}
+      - META_APP_ID=${META_APP_ID:-}
+      - META_APP_SECRET=${META_APP_SECRET:-}
+      - GOOGLE_ADS_CLIENT_ID=${GOOGLE_ADS_CLIENT_ID:-}
+      - GOOGLE_ADS_CLIENT_SECRET=${GOOGLE_ADS_CLIENT_SECRET:-}
+      - GOOGLE_ADS_REFRESH_TOKEN=${GOOGLE_ADS_REFRESH_TOKEN:-}
+      - GOOGLE_ADS_DEVELOPER_TOKEN=${GOOGLE_ADS_DEVELOPER_TOKEN:-}
+      - GOOGLE_ADS_CUSTOMER_ID=${GOOGLE_ADS_CUSTOMER_ID:-}
+      - GOOGLE_ADS_LOGIN_CUSTOMER_ID=${GOOGLE_ADS_LOGIN_CUSTOMER_ID:-}
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN:-}
+      - SCRAPER_URL=http://scraper:8100
+    command: >
+      bash -c "
+        apt-get update -qq && apt-get install -y -qq jq >/dev/null 2>&1;
+        if ! command -v openclaw &>/dev/null; then
+          npm install -g openclaw@latest;
+        fi &&
+        python3 /root/.openclaw/scripts/fix-models-baseurl.py 2>/dev/null;
+        exec openclaw gateway
+      "
+    depends_on:
+      - scraper
+    networks:
+      - claw-net
+
+  scraper:
+    build: ./scraper
+    container_name: sumbawa-scraper
+    restart: unless-stopped
+    environment:
+      - META_ADS_ACCESS_TOKEN=${META_ADS_ACCESS_TOKEN:-}
+      - SCRAPER_PORT=8100
+    mem_limit: 1g
+    networks:
+      - claw-net
+
+volumes:
+  agent-home:
+  npm-global:
+  npm-bin:
+
+networks:
+  claw-net:
+    external: true

@@ -1,0 +1,28 @@
+# Secrets
+.env
+*.session
+
+# Data (leads, contacts - sensitive business data)
+data/
+
+# Logs
+logs/
+*.log
+
+# OpenClaw workspaces (agent runtime)
+workspace*/
+
+# Claude memory exports
+memory-export/
+
+# Python
+__pycache__/
+*.pyc
+
+# Lock files
+*.lock
+
+# OS / Editor
+.DS_Store
+*.swp
+*~
