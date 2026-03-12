@@ -9,8 +9,11 @@ data/
 logs/
 *.log
 
-# OpenClaw workspaces (agent runtime)
-workspace*/
+# OpenClaw workspace runtime (sessions, caches, .openclaw state)
+workspace*/.openclaw/
+workspace*/sessions/
+workspace*/drafts/
+workspace*/*.jsonl
 
 # Claude memory exports
 memory-export/
