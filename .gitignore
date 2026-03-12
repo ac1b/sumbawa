@@ -15,8 +15,6 @@ workspace*/sessions/
 workspace*/drafts/
 workspace*/*.jsonl
 
-# Claude memory exports
-memory-export/
 
 # Python
 __pycache__/
